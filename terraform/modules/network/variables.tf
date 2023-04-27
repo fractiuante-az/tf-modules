@@ -21,8 +21,10 @@ variable "vnet_cidr" {
 variable "subnets" {
   default = []
   type = list(object({
-    name = string
-    type = optional(string)
+    name              = string
+    type              = optional(string, "private")
+    service_endpoints = optional(list(string), [])
+    private_link      = optional(bool, false)
   }))
 
 }
