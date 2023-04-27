@@ -1,10 +1,13 @@
 variable "identifier" {}
 
+variable "resource_group_name" {}
+
+variable "location" {}
+
 variable "vnet_name_override" {
   default = ""
 }
 
-variable "resource_group_name" {}
 
 variable "tags" {
   type    = map(any)
