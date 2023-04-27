@@ -7,5 +7,9 @@ output "vnet_cidr" {
 }
 
 output "subnets" {
-  value = var.subnets
+  value = local.subnet_count > 0 ? [for subnet in azurerm_subnet.subnets : {
+    id               = subnet.id
+    name             = subnet.name
+    address_prefixes = subnet.address_prefixes
+  }] : []
 }
