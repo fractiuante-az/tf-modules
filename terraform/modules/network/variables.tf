@@ -1,6 +1,8 @@
 variable "identifier" {}
 
-variable "vnet_name_override" {}
+variable "vnet_name_override" {
+  default = ""
+}
 
 variable "resource_group_name" {}
 
