@@ -3,6 +3,13 @@ variable "location" {
   description = "The Azure Region in which all resources in this example should be provisioned"
 }
 
+variable "aad_group_id_rpa_admin" {
+  type = string
+}
+
+variable "ARM_TENANT_ID" {
+  type = string
+}
 
 variable "inbound_endpoints" {
   description = <<EOD

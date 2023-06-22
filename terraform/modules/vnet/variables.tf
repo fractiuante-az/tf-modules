@@ -23,8 +23,9 @@ variable "subnets" {
   type = list(object({
     name              = string
     type              = optional(string, "private")
-    service_endpoints = optional(list(string), [])
+    service_endpoints = optional(list(string), null)
     private_link      = optional(bool, false)
+    subnet_delegation = optional(bool, false)
   }))
 
 }

@@ -21,5 +21,5 @@ variable "create_public_ip" {
 }
 
 variable "dns_private_zone_name" {
-  default = ""  
+  default = ""
 }

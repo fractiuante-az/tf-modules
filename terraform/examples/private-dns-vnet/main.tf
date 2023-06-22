@@ -11,21 +11,29 @@ module "azure_private_dns_zone" {
 
 module "azure_vnet" {
   source                = "../../modules/vnet"
-  depends_on            = [module.azure_private_dns_zone]
+  depends_on            = [azurerm_resource_group.this, module.azure_private_dns_zone]
   identifier            = local.identifier
   location              = var.location
   resource_group_name   = azurerm_resource_group.this.name
   vnet_cidr             = "10.1.0.0/16"
   private_dns_zone_name = module.azure_private_dns_zone.name
-  subnets = [{
-    name = "PrivateSubnet"
-    type = "private"
-  }]
+  subnets = [
+    {
+      name = "PrivateSubnet"
+      type = "private"
+    },
+    {
+      name = "PrivateSubnetB"
+      type = "private"
+    }
+  ]
 }
 
 module "vms" {
-  for_each              = toset(["1", "2"])
+  for_each              = toset([])
+  # for_each              = toset(["1", "2"])
   source                = "../../modules/virtual-machine"
+  depends_on            = [azurerm_resource_group.this, module.azure_vnet, module.azure_private_dns_zone]
   identifier            = "${local.identifier}-${each.key}"
   location              = var.location
   resource_group_name   = azurerm_resource_group.this.name

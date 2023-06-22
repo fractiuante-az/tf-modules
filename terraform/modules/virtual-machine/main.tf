@@ -1,20 +1,8 @@
-resource "random_integer" "random_id" {
-  keepers = {
-    resource_group = var.resource_group_name
-    location       = var.location
-  }
-  min = 1
-  max = 9999
-  # byte_length = 4
-}
-
-resource "azurerm_storage_account" "boot_diagnostics_sa" {
-  name = lower(replace(replace("${var.identifier}bd${random_integer.random_id.result}", "_", ""), "-", ""))
-
-  location                 = var.location
-  resource_group_name      = var.resource_group_name
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
+module "sa_boot_diagnostics" {
+  source              = "../storage-account"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  identifier          = "${var.identifier}bd"
 }
 
 # Create (and display) an SSH key
@@ -82,7 +70,7 @@ resource "azurerm_linux_virtual_machine" "this" {
   }
 
   boot_diagnostics {
-    storage_account_uri = azurerm_storage_account.boot_diagnostics_sa.primary_blob_endpoint
+    storage_account_uri = module.sa_boot_diagnostics.primary_blob_endpoint
   }
 }
 

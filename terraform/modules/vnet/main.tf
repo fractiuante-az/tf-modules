@@ -18,10 +18,43 @@ resource "azurerm_subnet" "subnets" {
   virtual_network_name = azurerm_virtual_network.vnet.name
   resource_group_name  = var.resource_group_name
   # Reverse exp2 function with log2 function and use ceil to break vnet into even sized subnets with maximum size possible
-  address_prefixes                              = [cidrsubnet(var.vnet_cidr, ceil(log(local.subnet_count, 2)), index(var.subnets, each.value))]
+  # Ensure DNS Resolver Endpoint Subnets are 24 <= CIDR <= 28 
+  address_prefixes = [
+    local.vpn_subnets_subnet_count > 0 ?
+    (
+      each.value.subnet_delegation ?
+      (
+        "${split("/", cidrsubnet(local.vpn_subnets_subnet_cidr_range, ceil(log(local.vpn_subnets_subnet_count, 2)), index(local.vpn_subnets, each.value)))[0]}/${min(max(split("/", cidrsubnet(local.vpn_subnets_subnet_cidr_range, ceil(log(local.vpn_subnets_subnet_count, 2)), index(local.vpn_subnets, each.value)))[1], 28), 24)}"
+      ) :
+      (
+        each.value.name == "GatewaySubnet" ?
+        cidrsubnet(local.vpn_subnets_subnet_cidr_range, ceil(log(local.vpn_subnets_subnet_count, 2)), index(local.vpn_subnets, each.value)) :
+        cidrsubnet(local.service_subnet_cidr_range, ceil(log(local.service_subnets_subnet_count, 2)), index(local.service_subnets, each.value))
+      )
+    ) :
+    cidrsubnet(local.service_subnet_cidr_range, ceil(log(local.subnet_count, 2)), index(var.subnets, each.value))
+  ]
+
+
+
   service_endpoints                             = each.value.service_endpoints
   private_link_service_network_policies_enabled = each.value.private_link
   private_endpoint_network_policies_enabled     = each.value.private_link
+
+  dynamic "delegation" {
+    for_each = each.value.subnet_delegation ? local.dns_resolver_subnets_delegation : {}
+    content {
+      name = delegation.key
+      dynamic "service_delegation" {
+        for_each = toset(delegation.value)
+        content {
+          name    = service_delegation.value.name
+          actions = service_delegation.value.actions
+        }
+      }
+    }
+  }
+
 }
 
 

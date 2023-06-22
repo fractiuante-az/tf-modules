@@ -1,5 +1,17 @@
 output "vnet_name" {
-  value = local.vnet_name
+  value = azurerm_virtual_network.vnet.name
+}
+
+output "vnet_id" {
+  value = azurerm_virtual_network.vnet.id
+}
+
+output "resource_group_name" {
+  value = var.resource_group_name
+}
+
+output "gateway_subnet_cidr" {
+  value = local.gateway_subnet_cidr
 }
 
 output "vnet_cidr" {
